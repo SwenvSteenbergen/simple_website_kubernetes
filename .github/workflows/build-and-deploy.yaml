@@ -8,6 +8,9 @@ on:
       - "app/**"
       - "k8s/**"
 
+permissions:
+  contents: write
+
 jobs:
   build-push-update:
     runs-on: ubuntu-latest
