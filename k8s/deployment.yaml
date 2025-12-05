@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-website
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-website
+  template:
+    metadata:
+      labels:
+        app: simple-website
+    spec:
+      containers:
+        - name: web
+          image: swennie/simple-site:v1
+          ports:
+            - containerPort: 80
