@@ -14,35 +14,47 @@ permissions:
 jobs:
   build-push-update:
     runs-on: ubuntu-latest
-
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Set variables
       - name: Set variables
         id: vars
         run: echo "TAG=${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
+      # 3️⃣ Login to DockerHub
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 4️⃣ Build Docker image
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/simple-site:${{ steps.vars.outputs.TAG }} ./app
 
+      # 5️⃣ Push Docker image
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/simple-site:${{ steps.vars.outputs.TAG }}
 
-      - name: Update Kubernetes deployment image tag
+      # 6️⃣ Update green deployment image tag only
+      - name: Update green deployment image tag
         run: |
-          sed -i "s|image: .*$|image: ${{ secrets.DOCKERHUB_USERNAME }}/simple-site:${{ steps.vars.outputs.TAG }}|g" k8s/deployment.yaml
+          sed -i "s|image: swennie/simple-site:.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/simple-site:${{ steps.vars.outputs.TAG }}|g" k8s/deployment.yaml
 
-      - name: Commit and push updated manifest
+      # 7️⃣ Optional: switch service selector to green (activate green deployment)
+      - name: Switch service to green
+        run: |
+          sed -i "s/version: blue/version: green/g" k8s/service.yaml
+
+      - name: Commit and push updated manifests
         run: |
           git config user.name "${{ secrets.GIT_NAME }}"
           git config user.email "${{ secrets.GIT_EMAIL }}"
           git add k8s/deployment.yaml
-          git commit -m "Update image tag to ${{ steps.vars.outputs.TAG }}"
+          # Include service.yaml if switching traffic
+          # git add k8s/service.yaml
+          git commit -m "Update green deployment image tag to ${{ steps.vars.outputs.TAG }}" || echo "No changes to commit"
           git push
