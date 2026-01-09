@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: swennie/simple-site:175bc762ad685e01ac6f2043e112e1165d26da32
+          image: swennie/simple-site:2843c5a3269a955b476f1906784ca563ed92cf43
           ports:
             - containerPort: 80
 
@@ -42,6 +42,6 @@ spec:
     spec:
       containers:
         - name: web
-          image: swennie/simple-site:<NEW_IMAGE_TAG>
+          image: swennie/simple-site:2843c5a3269a955b476f1906784ca563ed92cf43
           ports:
             - containerPort: 80
