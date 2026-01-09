@@ -1,19 +1,47 @@
+# Blue Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: simple-website
+  name: simple-website-blue
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: simple-website
+      version: blue
   template:
     metadata:
       labels:
         app: simple-website
+        version: blue
     spec:
       containers:
         - name: web
           image: swennie/simple-site:175bc762ad685e01ac6f2043e112e1165d26da32
+          ports:
+            - containerPort: 80
+
+---
+
+# Green Deployment (update image when deploying new version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-website-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-website
+      version: green
+  template:
+    metadata:
+      labels:
+        app: simple-website
+        version: green
+    spec:
+      containers:
+        - name: web
+          image: swennie/simple-site:<NEW_IMAGE_TAG>
           ports:
             - containerPort: 80
